@@ -1,14 +1,20 @@
-file(
- GLOB_RECURSE ASSIGNMENT1_INC CONFIGURE_DEPENDS
- RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
- *.h *.hpp
-)
+#file(
+# GLOB_RECURSE ASSIGNMENT1_INC CONFIGURE_DEPENDS
+# RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+# *.h *.hpp
+#)
 
-file(
- GLOB_RECURSE ASSIGNMENT1_SRC CONFIGURE_DEPENDS
- RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
- *.c *.cpp
-)
+#file(
+# GLOB_RECURSE ASSIGNMENT1_SRC CONFIGURE_DEPENDS
+# RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+# *.c *.cpp
+#)
+
+# Hello Eric Winebrenner, the above globbing include files that shouldn't be included in certain build systems, it broke on Cooper's machine
+# - Gus
+set(ASSIGNMENT1_SRC main.cpp)
+set(ASSIGNMENT1_INC )
+
 #Copies this assignment1's asset folder to bin when it is built
 add_custom_target(copyAssetsA1 ALL COMMAND ${CMAKE_COMMAND} -E copy_directory
 ${CMAKE_CURRENT_SOURCE_DIR}/assets/

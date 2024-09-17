@@ -13,8 +13,8 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
 
     try
     {
-        vShaderFile.open("assets/Shaders/vertexShader.vert");
-        fShaderFile.open("assets/Shaders/fragmentShader.frag");
+        vShaderFile.open(vertexPath);
+        fShaderFile.open(fragmentPath);
         std::stringstream vShaderStream, fShaderStream;
 
         vShaderStream << vShaderFile.rdbuf();
@@ -22,6 +22,9 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
 
         vShaderFile.close();
         fShaderFile.close();
+
+		vertexCode = vShaderStream.str();
+		fragmentCode = fShaderStream.str();
     }
 
 
@@ -36,4 +39,51 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
     const char* fShaderCode = fragmentCode.c_str();
 
     //im confused. is this necessary?
+
+	//vertex shader create and compile
+	int success;
+	char infolog[512];
+
+	unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(vertexShader, 1, &vShaderCode, NULL);
+	glCompileShader(vertexShader);
+	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+	if (!success)
+	{
+		glGetShaderInfoLog(vertexShader, 512, NULL, infolog);
+		printf("ERROR:SHADER::VERTEX::COMPILATION_FAILED\n%s", infolog);
+	}
+
+	//create and compile fragment shader
+	unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(fragmentShader, 1, &fShaderCode, NULL);
+	glCompileShader(fragmentShader);
+	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+	if (!success)
+	{
+		glGetShaderInfoLog(vertexShader, 512, NULL, infolog);
+		printf("ERROR:SHADER::FRAGMENT::COMPILATION_FAILED\n%s", infolog);
+	}
+
+	//shader program
+	ID = glCreateProgram();
+	glAttachShader(ID, vertexShader);
+	glAttachShader(ID, fragmentShader);
+	glLinkProgram(ID);
+
+	glGetProgramiv(ID, GL_LINK_STATUS, &success);
+	if (!success) {
+		glGetProgramInfoLog(ID, 512, NULL, infolog);
+		printf("Linking Error: %s", infolog);
+	}
+
+	glDeleteShader(vertexShader);
+	glDeleteShader(fragmentShader);
+
+}
+
+void Shader::use()
+{
+	glUseProgram(ID);
+
 }
