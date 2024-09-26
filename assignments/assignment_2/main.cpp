@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <math.h>
 
-
-
 #include <ew/external/glad.h>
 #include <ew/ewMath/ewMath.h>
 #include <GLFW/glfw3.h>
@@ -27,6 +25,14 @@ unsigned int indices[] = {
 	0, 1, 3,
 	1, 2, 3
 };
+
+float textCoords[] = {
+	0.0f, 0.0f,
+	1.0f, 0.0f,
+	0.5f, 1.0f
+};
+
+
 
 
 
@@ -72,6 +78,31 @@ int main() {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	Shader myShader { VERT_SHADER_PATH, FRAG_SHADER_PATH };
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+	unsigned int texture;
+	glGenTextures(1, &texture);
+
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	int width, height, nrChannels;
+	unsigned char* data = stbi_load("wall.jpg", &width, &height, &nrChannels, 0);
+
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "failed to load texture" << std::endl;
+	}
+	stbi_image_free(data);
+
+	
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
 	
 	//Render loop
