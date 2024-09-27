@@ -97,6 +97,8 @@ int main() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
 
+	//how do i make multiple textures properly?
+
 	//texture is loading properly.
 	int width, height, nrChannels;
 	unsigned char* data = stbi_load("assets/textures/wall.jpg", &width, &height, &nrChannels, 0);
@@ -111,6 +113,36 @@ int main() {
 		std::cout << "failed to load texture" << std::endl;
 	}
 	stbi_image_free(data);
+
+	//texture 2
+	unsigned char* data2 = stbi_load("assets/textures/CoolGuy.png", &width, &height, &nrChannels, 0);
+
+	if (data2)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data2);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "failed to load texture" << std::endl;
+	}
+	stbi_image_free(data2);
+
+	//texture 3
+	unsigned char* data3 = stbi_load("assets/textures/AwesomeGhost.png", &width, &height, &nrChannels, 0);
+
+	if (data3)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data3);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "failed to load texture" << std::endl;
+	}
+	stbi_image_free(data3);
+
+
 
 	
 
