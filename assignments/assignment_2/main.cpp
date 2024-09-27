@@ -7,6 +7,7 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
+#include <CThronson/Texture.h>
 #include <CThronson/Shader.h>
 
 const int SCREEN_WIDTH = 1080;
@@ -14,6 +15,9 @@ const int SCREEN_HEIGHT = 720;
 
 const char* FRAG_SHADER_PATH = "assets/Shaders/fragmentShader.frag";
 const char* VERT_SHADER_PATH = "assets/Shaders/vertexShader.vert";
+const char* BG_VERT_SHADER_PATH = "assets/Shaders/bgVertexShader.vert";
+const char* BG_FRAG_SHADER_PATH = "assets/Shaders/bgFragShader.frag";
+
 
 float vertices[] = {
 	 0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
@@ -87,6 +91,8 @@ int main() {
 
 	Shader myShader { VERT_SHADER_PATH, FRAG_SHADER_PATH };
 
+	Shader bgShader { BG_VERT_SHADER_PATH, BG_FRAG_SHADER_PATH };
+
 	
 
 	unsigned int texture;
@@ -94,10 +100,9 @@ int main() {
 
 	glBindTexture(GL_TEXTURE_2D, texture);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
 
-	//how do i make multiple textures properly?
 	stbi_set_flip_vertically_on_load(true);
 
 
@@ -145,22 +150,30 @@ int main() {
 	stbi_image_free(data3);
 
 
-
-	
-
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
-	
 	//Render loop
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
 		//Clear framebuffer
 		glClearColor(0.3f, 0.4f, 0.9f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
-		//Drawing happens here!
+
+		//Drawing BG
+		bgShader.use();
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		//bgShader.setInt("GuyTexture", 0)
+		
+		
+
+
+		//Drawing Character
+		myShader.use();
+		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, texture);
 		
-		myShader.use();
+		
 
 		float timeValue = glfwGetTime();
 		float blackValue = sin(timeValue) / 2.0f + 0.5f;
