@@ -93,62 +93,23 @@ int main() {
 
 	Shader bgShader { BG_VERT_SHADER_PATH, BG_FRAG_SHADER_PATH };
 
+
+
+
+	Texture2D texture = Texture2D("assets/textures/AwesomeGhost.png", GL_NEAREST, GL_CLAMP_TO_BORDER);
 	
 
-	unsigned int texture;
-	glGenTextures(1, &texture);
+	
 
-	glBindTexture(GL_TEXTURE_2D, texture);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+	//make the other 2 textures
+	Texture2D bgTexture1 = Texture2D("assets/textures/CoolGuy.png", GL_NEAREST, GL_REPEAT);
+	Texture2D bgTexture2 = Texture2D("assets/textures/wall.jpg", GL_NEAREST, GL_REPEAT);
 
 	stbi_set_flip_vertically_on_load(true);
 
+	
 
-	//texture is loading properly.
-	int width, height, nrChannels;
-	unsigned char* data = stbi_load("assets/textures/wall.jpg", &width, &height, &nrChannels, 0);
-
-	if (data)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "failed to load texture" << std::endl;
-	}
-	stbi_image_free(data);
-
-	//texture 2
-	unsigned char* data2 = stbi_load("assets/textures/CoolGuy.png", &width, &height, &nrChannels, 0);
-
-	if (data2)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data2);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "failed to load texture" << std::endl;
-	}
-	stbi_image_free(data2);
-
-	//texture 3
-	unsigned char* data3 = stbi_load("assets/textures/AwesomeGhost.png", &width, &height, &nrChannels, 0);
-
-	if (data3)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data3);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "failed to load texture" << std::endl;
-	}
-	stbi_image_free(data3);
-
+	
 
 	//Render loop
 	while (!glfwWindowShouldClose(window)) {
@@ -159,10 +120,13 @@ int main() {
 
 		//Drawing BG
 		bgShader.use();
+		//i think this code should work after i make the textures?
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture);
+		bgTexture1.Bind(GL_TEXTURE0);
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, texture);
+		bgTexture2.Bind(GL_TEXTURE1);
+
+		glBindVertexArray(VAO);
 		//bgShader.setInt("GuyTexture", 0)
 		
 		
@@ -171,7 +135,8 @@ int main() {
 		//Drawing Character
 		myShader.use();
 		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, texture);
+		texture.Bind(GL_TEXTURE2);
+		//texture.Bind();
 		
 		
 

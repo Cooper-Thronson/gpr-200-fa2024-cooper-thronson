@@ -1,8 +1,5 @@
 #pragma once
 
-#include "../ew/external/stb_image.h"
-
-
 class Texture2D {
 
 public:
@@ -13,6 +10,6 @@ public:
 private: 
 	unsigned int m_id;
 	int m_width, m_height;
-
+	unsigned int texture;
 
 };

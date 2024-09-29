@@ -1,4 +1,4 @@
-#include "../ew/external/glad.h"
+
 #include <string>
 #include <fstream>
 #include <sstream>
