@@ -1,14 +1,14 @@
-file(
- GLOB_RECURSE ASSIGNMENT2_INC CONFIGURE_DEPENDS
- RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
- *.h *.hpp
-)
+#file(
+# GLOB_RECURSE ASSIGNMENT2_INC CONFIGURE_DEPENDS
+# RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+# *.h *.hpp
+#)
 
-file(
- GLOB_RECURSE ASSIGNMENT2_SRC CONFIGURE_DEPENDS
- RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
- *.c *.cpp
-)
+#file(
+# GLOB_RECURSE ASSIGNMENT2_SRC CONFIGURE_DEPENDS
+# RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+# *.c *.cpp
+#)
 
 # Hello Eric Winebrenner, the above globbing include files that shouldn't be included in certain build systems, it broke on Cooper's machine
 # - Gus
