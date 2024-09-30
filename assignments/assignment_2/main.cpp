@@ -94,18 +94,18 @@ int main() {
 	Shader bgShader { BG_VERT_SHADER_PATH, BG_FRAG_SHADER_PATH };
 
 
+	stbi_set_flip_vertically_on_load(true);
 
-
-	Texture2D texture = Texture2D("assets/textures/AwesomeGhost.png", GL_NEAREST, GL_CLAMP_TO_BORDER);
+	Texture2D texture = Texture2D("assets/Textures/AwesomeGhost.png", GL_NEAREST, GL_CLAMP_TO_BORDER, GL_RGBA);
 	
 
 	
 
 	//make the other 2 textures
-	Texture2D bgTexture1 = Texture2D("assets/textures/CoolGuy.png", GL_NEAREST, GL_REPEAT);
-	Texture2D bgTexture2 = Texture2D("assets/textures/wall.jpg", GL_NEAREST, GL_REPEAT);
+	Texture2D bgTexture1 = Texture2D("assets/Textures/CoolGuy.png", GL_NEAREST, GL_REPEAT, GL_RGBA);
+	Texture2D bgTexture2 = Texture2D("assets/Textures/wall.jpg", GL_NEAREST, GL_REPEAT, GL_RGB);
 
-	stbi_set_flip_vertically_on_load(true);
+	
 
 	
 
@@ -121,20 +121,21 @@ int main() {
 		//Drawing BG
 		bgShader.use();
 		//i think this code should work after i make the textures?
-		glActiveTexture(GL_TEXTURE0);
+	
 		bgTexture1.Bind(GL_TEXTURE0);
-		glActiveTexture(GL_TEXTURE1);
+		
 		bgTexture2.Bind(GL_TEXTURE1);
 
 		glBindVertexArray(VAO);
-		//bgShader.setInt("GuyTexture", 0)
+		bgShader.setInt("texture1", 0);
+		bgShader.setInt("texture2", 0);
 		
-		
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 
 		//Drawing Character
 		myShader.use();
-		glActiveTexture(GL_TEXTURE2);
+
 		texture.Bind(GL_TEXTURE2);
 		//texture.Bind();
 		
@@ -143,12 +144,11 @@ int main() {
 		float timeValue = glfwGetTime();
 		float blackValue = sin(timeValue) / 2.0f + 0.5f;
 
+		//shader.cpp setfloat
 		int vertexColorLocation = glGetUniformLocation(myShader.ID, "colorScale");
 		glUniform1f(vertexColorLocation, blackValue);
 		
 
-		
-		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 		glfwSwapBuffers(window);
