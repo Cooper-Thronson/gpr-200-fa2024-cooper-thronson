@@ -11,7 +11,9 @@ out vec2 TexCoord;
 
 void main()
 {
-	gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+	vec3 newPos = aPos;
+	newPos *= 20;
+	gl_Position = vec4(newPos.x, newPos.y, newPos.z, 1.0);
 	outColor = aColor;
 	//outColor = mix(aColor, vec3(0.0, 0.0, 0.0), colorScale);
 	TexCoord = aTexCoord;

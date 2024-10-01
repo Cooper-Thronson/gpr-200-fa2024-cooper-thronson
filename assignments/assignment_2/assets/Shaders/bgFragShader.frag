@@ -5,14 +5,15 @@ in vec3 outColor;
 
 uniform sampler2D texture1;
 uniform sampler2D texture2;
+uniform float scale;
 
 //FragColor = texture(_Tex,UV * 5.0);
-//somethin here idk
 
 void main ()
 {
+	vec2 UVs;
 	//mess with UV coords to loop
-
-	FragColor = mix(texture(texture1, TexCoord), texture(texture2, TexCoord), 0.2);
+	UVs = TexCoord * scale;
+	FragColor = mix(texture(texture1, UVs), texture(texture2, UVs), 0.5);
 
 }

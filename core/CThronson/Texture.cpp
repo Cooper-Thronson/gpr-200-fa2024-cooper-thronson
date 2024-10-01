@@ -40,8 +40,11 @@ Texture2D::~Texture2D()
 
 void Texture2D::Bind(unsigned int slot)
 {
-	glBindTexture(GL_TEXTURE_2D, texture);
 
 	glActiveTexture(slot);
+
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	
 	return;
 }

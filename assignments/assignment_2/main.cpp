@@ -102,8 +102,8 @@ int main() {
 	
 
 	//make the other 2 textures
-	Texture2D bgTexture1 = Texture2D("assets/Textures/CoolGuy.png", GL_NEAREST, GL_REPEAT, GL_RGBA);
-	Texture2D bgTexture2 = Texture2D("assets/Textures/wall.jpg", GL_NEAREST, GL_REPEAT, GL_RGB);
+	Texture2D bgTexture1("assets/Textures/CoolGuy.png", GL_NEAREST, GL_REPEAT, GL_RGBA);
+	Texture2D bgTexture2("assets/Textures/wall.jpg", GL_NEAREST, GL_REPEAT, GL_RGB);
 
 	
 
@@ -121,14 +121,17 @@ int main() {
 		//Drawing BG
 		bgShader.use();
 		//i think this code should work after i make the textures?
-	
-		bgTexture1.Bind(GL_TEXTURE0);
 		
+		bgShader.setInt("texture1", 0);
+		bgShader.setInt("texture2", 1);
+		bgShader.setFloat("scale", 50);
+		bgTexture1.Bind(GL_TEXTURE0);
 		bgTexture2.Bind(GL_TEXTURE1);
+		
 
 		glBindVertexArray(VAO);
-		bgShader.setInt("texture1", 0);
-		bgShader.setInt("texture2", 0);
+		
+		
 		
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
@@ -137,6 +140,7 @@ int main() {
 		myShader.use();
 
 		texture.Bind(GL_TEXTURE2);
+		myShader.setInt("ourTexture", 2);
 		//texture.Bind();
 		
 		
