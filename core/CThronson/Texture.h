@@ -5,7 +5,7 @@ class Texture2D {
 public:
 	Texture2D(const char* filePath, int filterMode, int wrapMode, int format);
 	~Texture2D();
-	void Bind(unsigned int slot = 0);
+	void Bind(unsigned int slot);
 
 private: 
 	unsigned int m_id;

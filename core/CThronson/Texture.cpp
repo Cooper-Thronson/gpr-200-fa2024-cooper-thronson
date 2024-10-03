@@ -1,6 +1,5 @@
 #include "Texture.h"
 #include <iostream>
-//#include <GLFW/glfw3.h>
 #include "../ew/external/glad.h"
 #include "../ew/external/stb_image.h"
 
