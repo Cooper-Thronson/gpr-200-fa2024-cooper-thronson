@@ -99,7 +99,7 @@ int main() {
 
 	Shader myShader { VERT_SHADER_PATH, FRAG_SHADER_PATH };
 
-	Shader bgShader { BG_VERT_SHADER_PATH, BG_FRAG_SHADER_PATH };
+	//Shader bgShader { BG_VERT_SHADER_PATH, BG_FRAG_SHADER_PATH };
 	
 
 	stbi_set_flip_vertically_on_load(true);
@@ -110,10 +110,10 @@ int main() {
 	
 
 	//make the other 2 textures
-	Texture2D bgTexture1("assets/Textures/CoolGuy.png", GL_NEAREST, GL_REPEAT, GL_RGBA);
-	Texture2D bgTexture2("assets/Textures/wall.jpg", GL_NEAREST, GL_REPEAT, GL_RGB);
+	//Texture2D bgTexture1("assets/Textures/CoolGuy.png", GL_NEAREST, GL_REPEAT, GL_RGBA);
+	//Texture2D bgTexture2("assets/Textures/wall.jpg", GL_NEAREST, GL_REPEAT, GL_RGB);
 
-	model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	model = glm::rotate(model, (float)glfwGetTime * glm::radians(50.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
 	projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
@@ -133,6 +133,7 @@ int main() {
 		glClearColor(0.3f, 0.4f, 0.9f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
+		/*
 		//Drawing BG
 		bgShader.use();
 		//i think this code should work after i make the textures?
@@ -142,7 +143,7 @@ int main() {
 		bgShader.setFloat("scale", 50);
 		bgTexture1.Bind(GL_TEXTURE0);
 		bgTexture2.Bind(GL_TEXTURE1);
-		
+		*/
 
 		glBindVertexArray(VAO);
 		
@@ -169,6 +170,7 @@ int main() {
 		
 
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		glfwSwapBuffers(window);
 	}
