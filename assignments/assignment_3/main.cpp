@@ -19,6 +19,14 @@ const char* BG_VERT_SHADER_PATH = "assets/Shaders/bgVertexShader.vert";
 const char* BG_FRAG_SHADER_PATH = "assets/Shaders/bgFragShader.frag";
 
 
+glm::mat4 model = glm::mat4(1.0f);
+
+glm::mat4 view = glm::mat4(1.0f);
+
+glm::mat4 projection;
+
+
+
 float vertices[] = {
 	 0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
 	 0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
@@ -92,7 +100,7 @@ int main() {
 	Shader myShader { VERT_SHADER_PATH, FRAG_SHADER_PATH };
 
 	Shader bgShader { BG_VERT_SHADER_PATH, BG_FRAG_SHADER_PATH };
-
+	
 
 	stbi_set_flip_vertically_on_load(true);
 
@@ -105,11 +113,18 @@ int main() {
 	Texture2D bgTexture1("assets/Textures/CoolGuy.png", GL_NEAREST, GL_REPEAT, GL_RGBA);
 	Texture2D bgTexture2("assets/Textures/wall.jpg", GL_NEAREST, GL_REPEAT, GL_RGB);
 
-	
+	model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+	projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
-	
+	int modelLoc = glGetUniformLocation(myShader.ID, "model");
+	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
-	
+	int viewLoc = glGetUniformLocation(myShader.ID, "view");
+	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(view));
+
+	int projLoc = glGetUniformLocation(myShader.ID, "projection");
+	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
 	//Render loop
 	while (!glfwWindowShouldClose(window)) {
