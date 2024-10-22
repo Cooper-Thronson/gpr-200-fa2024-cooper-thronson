@@ -21,12 +21,32 @@ const char* VERT_SHADER_PATH = "assets/Shaders/vertexShader.vert";
 const char* BG_VERT_SHADER_PATH = "assets/Shaders/bgVertexShader.vert";
 const char* BG_FRAG_SHADER_PATH = "assets/Shaders/bgFragShader.frag";
 
+float deltaTime = 0.0f;
+float lastFrame = 0.0f;
 
 glm::mat4 model = glm::mat4(1.0f);
 
 glm::mat4 view = glm::mat4(1.0f);
 
 glm::mat4 projection;
+//camera vecs
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
+glm::vec3 cameraDirecton = glm::normalize(cameraPos - cameraTarget);
+glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirecton));
+glm::vec3 cameraUp = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 1.0f, 0.0f);
+
+const float radius = 10.0f;
+float camX = sin(glfwGetTime()) * radius;
+float camZ = cos(glfwGetTime()) * radius;
+
+
+glm::mat4 view;
+view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+
+
 
 
 
@@ -109,7 +129,18 @@ glm::vec3 cubePositions[] = {
 
 
 
-
+void processInput(GLFWwindow* window)
+{
+	const float cameraSpeed = 0.05f;
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		cameraPos += cameraSpeed * cameraFront;
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		cameraPos -= cameraSpeed * cameraFront;
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+}
 
 int main() {
 	printf("Initializing...");
@@ -175,6 +206,7 @@ int main() {
 	//Texture2D bgTexture1("assets/Textures/CoolGuy.png", GL_NEAREST, GL_REPEAT, GL_RGBA);
 	//Texture2D bgTexture2("assets/Textures/wall.jpg", GL_NEAREST, GL_REPEAT, GL_RGB);
 
+	//glm translation stuff
 	model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
 	projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
@@ -193,6 +225,7 @@ int main() {
 	//Render loop
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
+		processInput(window);
 		//Clear framebuffer
 		glClearColor(0.3f, 0.4f, 0.9f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -225,6 +258,7 @@ int main() {
 			model = glm::translate(model, cubePositions[i]);
 			float angle = 20.0f * i;
 			model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+			model = glm::scale(model, glm::vec3(i, i, i));
 			//myShader.setMat4("model", model);
 
 			//draw arrays?
@@ -255,4 +289,6 @@ int main() {
 		glfwSwapBuffers(window);
 	}
 	printf("Shutting down...");
+
+
 }
