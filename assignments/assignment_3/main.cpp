@@ -37,6 +37,12 @@ glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirecton));
 glm::vec3 cameraUp = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 1.0f, 0.0f);
 
+float yaw = -90.0f;
+float pitch;
+
+glm::vec3 direction;
+
+
 const float radius = 10.0f;
 float camX = sin(glfwGetTime()) * radius;
 float camZ = cos(glfwGetTime()) * radius;
@@ -199,7 +205,8 @@ int main() {
 	Texture2D texture = Texture2D("assets/Textures/AwesomeGhost.png", GL_NEAREST, GL_CLAMP_TO_BORDER, GL_RGBA);
 	
 	glEnable(GL_DEPTH_TEST);
-	
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);;
+
 
 	//make the other 2 textures
 	//Texture2D bgTexture1("assets/Textures/CoolGuy.png", GL_NEAREST, GL_REPEAT, GL_RGBA);
@@ -209,7 +216,6 @@ int main() {
 	
 	glm::mat4 view = glm::mat4(1.0f);
 	
-
 
 	//glm location things
 	
@@ -223,7 +229,9 @@ int main() {
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
 	glEnable(GL_DEPTH_TEST);
-
+	direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+	direction.y = sin(glm::radians(pitch));
 	
 
 	//Render loop
@@ -278,7 +286,7 @@ int main() {
 			model = glm::translate(model, cubePositions[i]);
 			float angle = 20.0f * i;
 			model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-			model = glm::scale(model, glm::vec3(i/2, i/2, i/2));
+			model = glm::scale(model, glm::vec3(i/5, i/5, i/5));
 			myShader.setMat4("model", model);
 
 			//draw arrays?
