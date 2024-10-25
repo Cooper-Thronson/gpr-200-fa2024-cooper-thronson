@@ -26,7 +26,6 @@ float lastFrame = 0.0f;
 
 glm::mat4 model = glm::mat4(1.0f);
 
-glm::mat4 view = glm::mat4(1.0f);
 
 glm::mat4 projection;
 //camera vecs
@@ -130,9 +129,9 @@ glm::vec3 cubePositions[] = {
 
 void processInput(GLFWwindow* window)
 {
-	const float cameraSpeed = 0.05f;
+	const float cameraSpeed = 2.5f * deltaTime;
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		cameraPos += cameraSpeed * cameraFront;
+        cameraPos += cameraSpeed * cameraFront;
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
 		cameraPos -= cameraSpeed * cameraFront;
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
@@ -207,12 +206,13 @@ int main() {
 	//Texture2D bgTexture2("assets/Textures/wall.jpg", GL_NEAREST, GL_REPEAT, GL_RGB);
 
 	//glm translation stuff
-	model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-	projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+	
+	glm::mat4 view = glm::mat4(1.0f);
+	
 
 
 	//glm location things
+	
 	int modelLoc = glGetUniformLocation(myShader.ID, "model");
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
@@ -234,6 +234,10 @@ int main() {
 		glClearColor(0.3f, 0.4f, 0.9f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		float currentFrame = glfwGetTime();
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
+
 		/*
 		//Drawing BG
 		bgShader.use();
@@ -246,14 +250,24 @@ int main() {
 		bgTexture2.Bind(GL_TEXTURE1);
 		*/
 
-		glBindVertexArray(VAO);
+		
 
 
 
 		//Drawing Character
 		myShader.use();
 
+		
+
+		projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+	
 		view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+		myShader.setMat4("projection", projection);
+		myShader.setMat4("view", view);
+
+
+		glBindVertexArray(VAO);
 
 		texture.Bind(GL_TEXTURE2);
 		myShader.setInt("ourTexture", 2);
@@ -264,14 +278,13 @@ int main() {
 			model = glm::translate(model, cubePositions[i]);
 			float angle = 20.0f * i;
 			model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-			model = glm::scale(model, glm::vec3(i, i, i));
+			model = glm::scale(model, glm::vec3(i/2, i/2, i/2));
 			myShader.setMat4("model", model);
 
 			//draw arrays?
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
-		
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
 
 
 		
@@ -294,6 +307,6 @@ int main() {
 		glfwSwapBuffers(window);
 	}
 	printf("Shutting down...");
-
+	glfwTerminate();
 
 }
