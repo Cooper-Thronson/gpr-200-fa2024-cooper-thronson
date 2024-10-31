@@ -1,6 +1,8 @@
 #version 330 core
 out vec4 FragColor;
 
+uniform vec3 lightPos;
+
 in vec3 outColor;
 in vec2 TexCoord;
 in vec3 Normal;

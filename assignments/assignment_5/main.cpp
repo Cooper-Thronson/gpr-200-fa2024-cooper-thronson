@@ -9,6 +9,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include<imgui_impl_opengl3.h>
+
 #include <CThronson/Texture.h>
 #include <CThronson/Shader.h>
 
@@ -165,6 +169,11 @@ int main() {
 		printf("GLAD Failed to load GL headers");
 		return 1;
 	}
+
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init();
 
 	glfwSetScrollCallback(window, scroll_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);

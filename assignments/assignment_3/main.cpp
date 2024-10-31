@@ -13,6 +13,8 @@
 #include <CThronson/Shader.h>
 
 
+
+
 const int SCREEN_WIDTH = 1080;
 const int SCREEN_HEIGHT = 720;
 
@@ -170,6 +172,11 @@ int main() {
 		printf("GLAD Failed to load GL headers");
 		return 1;
 	}
+
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init();
 
 	glfwSetScrollCallback(window, scroll_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
