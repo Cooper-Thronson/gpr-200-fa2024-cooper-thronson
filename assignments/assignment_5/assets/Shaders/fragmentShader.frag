@@ -6,6 +6,7 @@ uniform vec3 lightPos;
 in vec3 outColor;
 in vec2 TexCoord;
 in vec3 Normal;
+in vec3 WorldPos;
 
 uniform sampler2D ourTexture;
 
