@@ -24,12 +24,25 @@ const char* FRAG_SHADER_PATH = "assets/Shaders/fragmentShader.frag";
 const char* VERT_SHADER_PATH = "assets/Shaders/vertexShader.vert";
 const char* BG_VERT_SHADER_PATH = "assets/Shaders/bgVertexShader.vert";
 const char* BG_FRAG_SHADER_PATH = "assets/Shaders/bgFragShader.frag";
+const char* LB_FRAG_SHADER_PATH = "assets/Shaders/lightbulbShader.frag";
+const char* LB_VERT_SHADER_PATH = "assets/Shaders/lightbulbShader.vert";
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
+
+bool mouseLock;
+
+
+glm::vec3 lightPosition;
+glm::vec3 lightColor;
+float ambientK;
+float diffuseK;
+float shininess;
+float specularK;
+
 
 glm::mat4 model = glm::mat4(1.0f);
 
@@ -170,13 +183,15 @@ int main() {
 		return 1;
 	}
 
+	glfwSetScrollCallback(window, scroll_callback);
+	glfwSetCursorPosCallback(window, mouse_callback);
+
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init();
 
-	glfwSetScrollCallback(window, scroll_callback);
-	glfwSetCursorPosCallback(window, mouse_callback);
+	
 	//Initialization goes here!
 	//vertex array object
 	unsigned int VAO;
@@ -200,9 +215,6 @@ int main() {
 	// position attribute
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
-	// color attribute
-	//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-	//glEnableVertexAttribArray(1);
 	// normal coords
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
@@ -213,7 +225,15 @@ int main() {
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+
+	// color attribute
+	//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	//glEnableVertexAttribArray(1);
+
 	Shader myShader { VERT_SHADER_PATH, FRAG_SHADER_PATH };
+	Shader bulbShader{ LB_VERT_SHADER_PATH, LB_FRAG_SHADER_PATH };
+
+
 
 	//Shader bgShader { BG_VERT_SHADER_PATH, BG_FRAG_SHADER_PATH };
 	
@@ -223,8 +243,6 @@ int main() {
 	Texture2D texture = Texture2D("assets/Textures/AwesomeGhost.png", GL_NEAREST, GL_CLAMP_TO_BORDER, GL_RGBA);
 	
 	glEnable(GL_DEPTH_TEST);
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);;
-
 
 	//make the other 2 textures
 	//Texture2D bgTexture1("assets/Textures/CoolGuy.png", GL_NEAREST, GL_REPEAT, GL_RGBA);
@@ -246,6 +264,9 @@ int main() {
 	int projLoc = glGetUniformLocation(myShader.ID, "projection");
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
+
+	
+
 	glEnable(GL_DEPTH_TEST);
 	direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
 	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
@@ -266,25 +287,24 @@ int main() {
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 
-		/*
-		//Drawing BG
-		bgShader.use();
-		//i think this code should work after i make the textures?
-		
-		bgShader.setInt("texture1", 0);
-		bgShader.setInt("texture2", 1);
-		bgShader.setFloat("scale", 50);
-		bgTexture1.Bind(GL_TEXTURE0);
-		bgTexture2.Bind(GL_TEXTURE1);
-		*/
+		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS)
+		{
+			mouseLock = true;
+		}
+		else {
+			mouseLock = false;
+		}
 
-		
+		if (mouseLock) {
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		} else {
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		}
 
 
 
 		//Drawing Character
 		myShader.use();
-
 		
 
 		projection = glm::perspective(glm::radians(fov), 800.0f / 600.0f, 0.1f, 100.0f);
@@ -293,6 +313,13 @@ int main() {
 		view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 		myShader.setMat4("projection", projection);
 		myShader.setMat4("view", view);
+		myShader.setFloat("shininess", shininess);
+		//CHANGE THESE VEC 3S
+		myShader.setFloat("diffStrength", diffuseK);
+		myShader.setFloat("ambientStrength", ambientK);
+		myShader.setVec3("lightPos", lightPosition);
+		myShader.setVec3("lightColor", lightColor);
+		myShader.setVec3("viewPos", cameraPos);
 
 
 		glBindVertexArray(VAO);
@@ -313,24 +340,40 @@ int main() {
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 
+		bulbShader.use();
 
+		bulbShader.setMat4("projection", projection);
+		bulbShader.setMat4("view", view);
+		//IMGUI
+		
+		bulbShader.setVec3("aColor", lightColor);
+		
+		glm::mat4 model = glm::mat4(1.0f);
+		//POS FROM IMGUI
+		model = glm::translate(model, lightPosition);
 
+		bulbShader.setMat4("model", model);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
 		
 
-		
-		//texture.Bind();
-		
+		ImGui_ImplGlfw_NewFrame();
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui::NewFrame();
+
+		ImGui::Begin("Settings");
+		{
+			ImGui::DragFloat3("Light Position", &lightPosition.x, 0.1f);
+			ImGui::ColorEdit3("Light Color", &lightColor.r);
+			ImGui::SliderFloat("Ambient K", &ambientK, 0.0f, 1.0f);
+			ImGui::SliderFloat("Diffuse K", &diffuseK, 0.0f, 1.0f);
+			ImGui::SliderFloat("Specular K", &specularK, 0.0f, 1.0f);
+			ImGui::SliderFloat("Shininess", &shininess, 2.0f, 1024.0f);
+		}
+		ImGui::End();
 		
 
-		//float timeValue = glfwGetTime();
-		//float blackValue = sin(timeValue) / 2.0f + 0.5f;
-
-		//shader.cpp setfloat
-		//int vertexColorLocation = glGetUniformLocation(myShader.ID, "colorScale");
-		//glUniform1f(vertexColorLocation, blackValue);
-		
-
-		
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 		glfwSwapBuffers(window);
 	}
@@ -341,6 +384,10 @@ int main() {
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
+	if (mouseLock == false)
+	{
+		return;
+	}
 	if (firstMouse)
 	{
 		lastX = xpos;
