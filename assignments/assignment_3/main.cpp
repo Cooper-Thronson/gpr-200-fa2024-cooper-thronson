@@ -65,7 +65,6 @@ float camZ = cos(glfwGetTime()) * radius;
 
 
 
-
 float vertices[] = {
 	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
 	 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
@@ -145,7 +144,16 @@ glm::vec3 cubePositions[] = {
 	glm::vec3(5.3f,  -4.0f, -2.5f)
 };
 
+/*
 
+std::vector<unsigned int> sphereIndices;
+unsigned int subdivs;
+float angleStep = glm::two_pi<float>() / (float)subdivs; 
+float heightStep = glm::pi<float>() / (float)subdivs;
+float phi = -glm::half_pi<float>();
+float y = glm::sin(phi);
+int row = 0;
+*/
 
 void processInput(GLFWwindow* window)
 {
@@ -219,7 +227,8 @@ int main() {
 
 	Shader myShader { VERT_SHADER_PATH, FRAG_SHADER_PATH };
 
-	//Shader bgShader { BG_VERT_SHADER_PATH, BG_FRAG_SHADER_PATH };
+
+	Shader bgShader { BG_VERT_SHADER_PATH, BG_FRAG_SHADER_PATH };
 	
 
 	stbi_set_flip_vertically_on_load(true);
@@ -255,8 +264,32 @@ int main() {
 	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 	direction.y = sin(glm::radians(pitch));
 
-
+	/*
+	float radius;
 	
+
+	for (; phi < glm::half_pi<float>() + heightStep; phi += heightStep, row++) {
+		y = glm::sin(phi);
+		radius = glm::cos(phi);
+		int cell = 0;
+		int noVertices = 0;
+		for (float th = 0; th < glm::two_pi<float>(); th += angleStep, cell++)
+		{
+			glm::vec3(radius* glm::cos(th), y, radius* glm::sin(th));
+			if (row)
+			{
+				int nextCell = (cell + 1) % subdivs;
+				sphereIndices.push_back(noVertices - subdivs);
+				sphereIndices.push_back((row - 1)* subdivs + nextCell);
+				sphereIndices.push_back(row* subdivs + nextCell);
+
+				sphereIndices.push_back(noVertices - subdivs);
+				sphereIndices.push_back(noVertices);
+				sphereIndices.push_back(row* subdivs + nextCell);
+			}
+		}
+	}
+	*/
 
 	//Render loop
 	while (!glfwWindowShouldClose(window)) {
@@ -282,6 +315,9 @@ int main() {
 		bgTexture2.Bind(GL_TEXTURE1);
 		*/
 
+		//draw sphere
+		//bgShader.use();
+		//whar? glDrawArrays(GL_TRIANGLES, (GLuint)sphereIndices.size(), GL_UNSIGNED_INT, 0, 1);
 		
 
 
