@@ -144,16 +144,22 @@ glm::vec3 cubePositions[] = {
 	glm::vec3(5.3f,  -4.0f, -2.5f)
 };
 
-/*
+struct vertex {
+	glm::vec3 pos;
+	//glm::vec3 normal;
+	//glm::vec2 UV
+};
 
+
+std::vector<vertex> sphereVertices;
 std::vector<unsigned int> sphereIndices;
-unsigned int subdivs;
+unsigned int subdivs = 64;
 float angleStep = glm::two_pi<float>() / (float)subdivs; 
 float heightStep = glm::pi<float>() / (float)subdivs;
 float phi = -glm::half_pi<float>();
 float y = glm::sin(phi);
 int row = 0;
-*/
+
 
 void processInput(GLFWwindow* window)
 {
@@ -264,8 +270,23 @@ int main() {
 	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 	direction.y = sin(glm::radians(pitch));
 
-	/*
+	
 	float radius;
+
+	//nested for loop for the vertices
+	for (int row = 0; row <= subdivs; row++)
+	{
+		float ph = heightStep * row;
+		for (int col = 0; col <= subdivs; col++)
+		{
+			float theta = angleStep * col;
+			vertex v;
+			v.pos.y = cos(ph);
+			v.pos.x = cos(theta) * sin(ph);
+			v.pos.z = sin(theta) * sin(ph);
+			sphereVertices.push_back(v);
+		}
+	}
 	
 
 	for (; phi < glm::half_pi<float>() + heightStep; phi += heightStep, row++) {
@@ -289,7 +310,39 @@ int main() {
 			}
 		}
 	}
+	//SPHERES
+	//vertex array object
+	unsigned int sphereVAO;
+	glGenVertexArrays(1, &sphereVAO);
+	glBindVertexArray(sphereVAO);
+
+	//vertex buffer object
+	unsigned int sphereVBO;
+	glGenBuffers(1, &sphereVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, sphereVBO);
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex) * sphereVertices.size(), sphereVertices.data(), GL_STATIC_DRAW);
+
+	/*unsigned int EBO;
+	glGenBuffers(1, &EBO);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 	*/
+
+	// position attribute
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)0);
+	glEnableVertexAttribArray(0);
+	// color attribute
+	//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	//glEnableVertexAttribArray(1);
+	// texture coord attribute
+	//glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	//glEnableVertexAttribArray(1);
+
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	
 
 	//Render loop
 	while (!glfwWindowShouldClose(window)) {
@@ -302,6 +355,12 @@ int main() {
 		float currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
+
+		projection = glm::perspective(glm::radians(fov), 800.0f / 600.0f, 0.1f, 100.0f);
+
+		view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+		myShader.setMat4("projection", projection);
+		myShader.setMat4("view", view);
 
 		/*
 		//Drawing BG
@@ -316,23 +375,16 @@ int main() {
 		*/
 
 		//draw sphere
-		//bgShader.use();
-		//whar? glDrawArrays(GL_TRIANGLES, (GLuint)sphereIndices.size(), GL_UNSIGNED_INT, 0, 1);
+		bgShader.use();
+		glPointSize(4.0);
+		glBindVertexArray(sphereVAO);
+		glDrawArrays(GL_POINTS, 0, sphereVertices.size());
 		
 
 
 
 		//Drawing Character
 		myShader.use();
-
-		
-
-		projection = glm::perspective(glm::radians(fov), 800.0f / 600.0f, 0.1f, 100.0f);
-		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-	
-		view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-		myShader.setMat4("projection", projection);
-		myShader.setMat4("view", view);
 
 
 		glBindVertexArray(VAO);

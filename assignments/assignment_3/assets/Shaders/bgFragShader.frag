@@ -14,6 +14,6 @@ void main ()
 	vec2 UVs;
 	//mess with UV coords to loop
 	UVs = TexCoord * scale;
-	FragColor = mix(texture(texture1, UVs), texture(texture2, UVs), 0.5);
+	FragColor = vec4(1, 0);
 
 }
