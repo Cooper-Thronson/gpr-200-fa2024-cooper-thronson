@@ -287,8 +287,30 @@ int main() {
 			sphereVertices.push_back(v);
 		}
 	}
-	
 
+	for (int row = 0; row < subdivs; row++)
+	{
+		for (int col = 0; col < subdivs; col++)
+		{
+			int tl = row * (subdivs + 1) + col;
+			int tr = tl + 1;
+			int bl = tl + subdivs + 1;
+			int br = bl + 1;
+
+			sphereIndices.push_back(bl);
+			sphereIndices.push_back(br);
+			sphereIndices.push_back(tr);
+			
+
+			sphereIndices.push_back(tr);
+			sphereIndices.push_back(tl);
+			sphereIndices.push_back(bl);
+			
+
+		}
+	}
+	
+	/*
 	for (; phi < glm::half_pi<float>() + heightStep; phi += heightStep, row++) {
 		y = glm::sin(phi);
 		radius = glm::cos(phi);
@@ -309,7 +331,7 @@ int main() {
 				sphereIndices.push_back(row* subdivs + nextCell);
 			}
 		}
-	}
+	}*/
 	//SPHERES
 	//vertex array object
 	unsigned int sphereVAO;
@@ -327,7 +349,7 @@ int main() {
 	glGenBuffers(1, &sphereEBO);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sphereEBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(sphereIndices), sphereIndices.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * sphereIndices.size(), sphereIndices.data(), GL_STATIC_DRAW);
 	
 
 	// position attribute
@@ -376,9 +398,13 @@ int main() {
 
 		//draw sphere
 		bgShader.use();
+		bgShader.setMat4("projection", projection);
+		bgShader.setMat4("view", view);
 		glPointSize(4.0);
+		glEnable(GL_CULL_FACE);
+		glPolygonMode(GL_CULL_FACE, GL_FILL);
 		glBindVertexArray(sphereVAO);
-		glDrawArrays(GL_TRIANGLES, 0, sphereVertices.size());
+		glDrawElements(GL_TRIANGLES, sphereIndices.size(), GL_UNSIGNED_INT, 0);
 		
 
 
