@@ -323,12 +323,12 @@ int main() {
 
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex) * sphereVertices.size(), sphereVertices.data(), GL_STATIC_DRAW);
 
-	/*unsigned int EBO;
-	glGenBuffers(1, &EBO);
+	unsigned int sphereEBO;
+	glGenBuffers(1, &sphereEBO);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-	*/
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sphereEBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(sphereIndices), sphereIndices.data(), GL_STATIC_DRAW);
+	
 
 	// position attribute
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)0);
@@ -378,7 +378,7 @@ int main() {
 		bgShader.use();
 		glPointSize(4.0);
 		glBindVertexArray(sphereVAO);
-		glDrawArrays(GL_POINTS, 0, sphereVertices.size());
+		glDrawArrays(GL_TRIANGLES, 0, sphereVertices.size());
 		
 
 
