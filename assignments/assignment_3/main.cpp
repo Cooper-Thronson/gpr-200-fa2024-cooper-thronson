@@ -271,7 +271,7 @@ int main() {
 	direction.y = sin(glm::radians(pitch));
 
 	
-	float radius;
+	float radius = 1000.0f;
 
 	//nested for loop for the vertices
 	for (int row = 0; row <= subdivs; row++)
@@ -284,6 +284,7 @@ int main() {
 			v.pos.y = cos(ph);
 			v.pos.x = cos(theta) * sin(ph);
 			v.pos.z = sin(theta) * sin(ph);
+			v.pos *= radius;
 			sphereVertices.push_back(v);
 		}
 	}
@@ -378,7 +379,7 @@ int main() {
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 
-		projection = glm::perspective(glm::radians(fov), 800.0f / 600.0f, 0.1f, 100.0f);
+		projection = glm::perspective(glm::radians(fov), 800.0f / 600.0f, 0.1f, 10000.0f);
 
 		view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 		myShader.setMat4("projection", projection);
@@ -400,10 +401,18 @@ int main() {
 		bgShader.use();
 		bgShader.setMat4("projection", projection);
 		bgShader.setMat4("view", view);
+		bgShader.setFloat("maxYPos", radius);
+		glm::mat4 model = glm::mat4(1.0f);
 		glPointSize(4.0);
 		glEnable(GL_CULL_FACE);
 		glPolygonMode(GL_CULL_FACE, GL_FILL);
 		glBindVertexArray(sphereVAO);
+		bgShader.setMat4("model", model);
+		glDrawElements(GL_TRIANGLES, sphereIndices.size(), GL_UNSIGNED_INT, 0);
+		glDisable(GL_CULL_FACE);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, -150.0f));
+		model = glm::scale(model, glm::vec3(0.002f, 0.002f, 0.002f));
+		bgShader.setMat4("model", model);
 		glDrawElements(GL_TRIANGLES, sphereIndices.size(), GL_UNSIGNED_INT, 0);
 		
 
@@ -412,7 +421,7 @@ int main() {
 		//Drawing Character
 		myShader.use();
 
-
+		
 		glBindVertexArray(VAO);
 
 		texture.Bind(GL_TEXTURE2);
