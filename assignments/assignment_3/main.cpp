@@ -26,6 +26,8 @@ const char* FRAG_SHADER_PATH = "assets/Shaders/fragmentShader.frag";
 const char* VERT_SHADER_PATH = "assets/Shaders/vertexShader.vert";
 const char* BG_VERT_SHADER_PATH = "assets/Shaders/bgVertexShader.vert";
 const char* BG_FRAG_SHADER_PATH = "assets/Shaders/bgFragShader.frag";
+const char* SUN_VERT_SHADER_PATH = "assets/Shaders/sunVertexShader.vert";
+const char* SUN_FRAG_SHADER_PATH = "assets/Shaders/sunFragShader.frag";
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
@@ -231,10 +233,14 @@ int main() {
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+
 	Shader myShader { VERT_SHADER_PATH, FRAG_SHADER_PATH };
 
 
 	Shader bgShader { BG_VERT_SHADER_PATH, BG_FRAG_SHADER_PATH };
+
+
+	Shader sunShader{ SUN_VERT_SHADER_PATH, SUN_FRAG_SHADER_PATH };
 	
 
 	stbi_set_flip_vertically_on_load(true);
@@ -409,10 +415,14 @@ int main() {
 		glBindVertexArray(sphereVAO);
 		bgShader.setMat4("model", model);
 		glDrawElements(GL_TRIANGLES, sphereIndices.size(), GL_UNSIGNED_INT, 0);
+
+		sunShader.use();
+		sunShader.setMat4("projection", projection);
+		sunShader.setMat4("view", view);
 		glDisable(GL_CULL_FACE);
-		model = glm::translate(model, glm::vec3(0.0f, 0.0f, -150.0f));
-		model = glm::scale(model, glm::vec3(0.002f, 0.002f, 0.002f));
-		bgShader.setMat4("model", model);
+		model = glm::translate(model, glm::vec3(0.0f, 2.0f, -150.0f));
+		model = glm::scale(model, glm::vec3(0.0015f, 0.0015f, 0.0015f));
+		sunShader.setMat4("model", model);
 		glDrawElements(GL_TRIANGLES, sphereIndices.size(), GL_UNSIGNED_INT, 0);
 		
 
