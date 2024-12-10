@@ -229,7 +229,7 @@ int main() {
 
 	Shader myShader { VERT_SHADER_PATH, FRAG_SHADER_PATH };
 
-	Shader waterShader("assets/waterVertexShader.vert", "assets/waterFragmentShader.frag");
+	Shader waterShader("assets/Shaders/waterVertexShader.vert", "assets/Shaders/waterFragmentShader.frag"); //water shader (isa)
 
 	//Shader bgShader { BG_VERT_SHADER_PATH, BG_FRAG_SHADER_PATH };
 	
@@ -241,7 +241,7 @@ int main() {
 	glEnable(GL_DEPTH_TEST);
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);;
 
-	// water plane initialization
+	// water plane initialization (isa)
 	ew::MeshData waterMeshData;
 	ew::createPlaneXY(10.0f, 10.0f, 11, &waterMeshData);
 	ew::Mesh waterMesh = ew::Mesh(waterMeshData);
@@ -283,11 +283,13 @@ int main() {
 		glClearColor(0.3f, 0.4f, 0.9f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		float time = (float)glfwGetTime();
+
 		float currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 
-		ew::DrawMode drawMode = pointRender ? ew::DrawMode::POINTS : ew::DrawMode::TRIANGLES;
+		ew::DrawMode drawMode = pointRender ? ew::DrawMode::POINTS : ew::DrawMode::TRIANGLES; //set draw mode for water draw call (isa)
 		/*
 		//Drawing BG
 		bgShader.use();
@@ -303,16 +305,26 @@ int main() {
 		//water shenanigans (courtesy of Isa)
 		waterShader.use();
 
+		//set uniforms
 		int viewLocWater = glGetUniformLocation(waterShader.getID(), "view");
 		glUniformMatrix4fv(viewLocWater, 1, GL_FALSE, glm::value_ptr(view));
 
 		int projLocWater = glGetUniformLocation(waterShader.getID(), "projection");
 		glUniformMatrix4fv(projLocWater, 1, GL_FALSE, glm::value_ptr(projection));
 
-		//waterShader.setVec3("lightPos", lightPos);
-		//waterShader.setVec3("lightColor", lightColor);
+		waterShader.setVec3("lightPos", lightPosition);
+		waterShader.setVec3("lightColor", lightColor);
 		waterShader.setVec3("viewPos", cameraPos);
-		//waterShader.setFloat("time", time);
+		waterShader.setFloat("time", time);
+
+		//more plane tomfoolery
+		glm::mat4 planeTransform = glm::mat4(1);
+		planeTransform = glm::rotate(planeTransform, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		planeTransform = glm::translate(planeTransform, glm::vec3(-5.0, -5.0, 0.0));
+		waterShader.setMat4("model", planeTransform);
+		//draw call
+		waterMesh.draw(drawMode);
+		//end water shenanigans
 
 
 		//Drawing Character
