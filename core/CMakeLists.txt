@@ -15,7 +15,7 @@ set(CORE_INC_DIR
  CACHE PATH "CORE INCLUDE SOURCE PATH"
 )
 
-add_library(core STATIC ${CORE_SRC} ${CORE_INC} "CThronson/Texture.cpp" "CThronson/Texture.h")
+add_library(core STATIC ${CORE_SRC} ${CORE_INC} "CThronson/Texture.cpp" "CThronson/Texture.h" "ew/mesh.cpp" "ew/mesh.h" "ew/procGen.cpp" "ew/procGen.h")
 
 find_package(OpenGL REQUIRED)
 

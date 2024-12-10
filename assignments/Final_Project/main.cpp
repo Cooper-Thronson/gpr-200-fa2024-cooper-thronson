@@ -16,6 +16,9 @@
 #include <CThronson/Texture.h>
 #include <CThronson/Shader.h>
 
+#include <ew/mesh.h>
+#include <ew/procGen.h>
+
 
 const int SCREEN_WIDTH = 1080;
 const int SCREEN_HEIGHT = 720;
@@ -58,6 +61,9 @@ glm::vec3 direction;
 const float radius = 10.0f;
 float camX = sin(glfwGetTime()) * radius;
 float camZ = cos(glfwGetTime()) * radius;
+
+bool wireFrame = false;
+bool pointRender = false;
 
 float vertices[] = {
 	-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f,
@@ -215,6 +221,8 @@ int main() {
 
 	Shader myShader { VERT_SHADER_PATH, FRAG_SHADER_PATH };
 
+	Shader waterShader("assets/waterVertexShader.vert", "assets/waterFragmentShader.frag");
+
 	//Shader bgShader { BG_VERT_SHADER_PATH, BG_FRAG_SHADER_PATH };
 	
 
@@ -224,6 +232,11 @@ int main() {
 	
 	glEnable(GL_DEPTH_TEST);
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);;
+
+	// water plane initialization
+	ew::MeshData waterMeshData;
+	ew::createPlaneXY(10.0f, 10.0f, 11, &waterMeshData);
+	ew::Mesh waterMesh = ew::Mesh(waterMeshData);
 
 
 	//make the other 2 textures
@@ -266,6 +279,7 @@ int main() {
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 
+		ew::DrawMode drawMode = pointRender ? ew::DrawMode::POINTS : ew::DrawMode::TRIANGLES;
 		/*
 		//Drawing BG
 		bgShader.use();
@@ -278,8 +292,19 @@ int main() {
 		bgTexture2.Bind(GL_TEXTURE1);
 		*/
 
-		
+		//water shenanigans (courtesy of Isa)
+		waterShader.use();
 
+		int viewLocWater = glGetUniformLocation(waterShader.getID(), "view");
+		glUniformMatrix4fv(viewLocWater, 1, GL_FALSE, glm::value_ptr(view));
+
+		int projLocWater = glGetUniformLocation(waterShader.getID(), "projection");
+		glUniformMatrix4fv(projLocWater, 1, GL_FALSE, glm::value_ptr(projection));
+
+		//waterShader.setVec3("lightPos", lightPos);
+		//waterShader.setVec3("lightColor", lightColor);
+		waterShader.setVec3("viewPos", cameraPos);
+		//waterShader.setFloat("time", time);
 
 
 		//Drawing Character

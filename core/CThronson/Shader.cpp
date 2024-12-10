@@ -112,3 +112,7 @@ void Shader::setVec3(const std::string& name, glm::vec3 lightPos) const
 {
 	glUniform3f(glGetUniformLocation(ID, name.c_str()), lightPos.x, lightPos.y, lightPos.z);
 }
+
+unsigned int Shader::getID() {
+	return ID;
+}
