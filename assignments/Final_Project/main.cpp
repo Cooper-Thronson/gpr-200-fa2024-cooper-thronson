@@ -71,7 +71,7 @@ const float radius = 10.0f;
 float camX = sin(glfwGetTime()) * radius;
 float camZ = cos(glfwGetTime()) * radius;
 
-bool wireFrame = false;
+bool waterWireFrame = false;
 bool pointRender = false;
 
 float vertices[] = {
@@ -402,6 +402,9 @@ int main() {
 			ImGui::SliderFloat("Diffuse K", &diffuseK, 0.0f, 1.0f);
 			ImGui::SliderFloat("Specular K", &specularK, 0.0f, 1.0f);
 			ImGui::SliderFloat("Shininess", &shininess, 2.0f, 1024.0f);
+		}
+		if (ImGui::Checkbox("Water Mesh Wireframe", &waterWireFrame)) {
+			glPolygonMode(GL_FRONT_AND_BACK, waterWireFrame ? GL_LINE : GL_FILL);
 		}
 		ImGui::End();
 
