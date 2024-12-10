@@ -61,6 +61,7 @@ float pitch = 0.0f;
 float lastX = 400;
 float lastY = 300;
 bool firstMouse;
+bool mouseLock;
 float fov = 45.0f;
 
 glm::vec3 direction;
@@ -326,6 +327,20 @@ int main() {
 		waterMesh.draw(drawMode);
 		//end water shenanigans
 
+		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS)
+		{
+			mouseLock = true;
+		}
+		else {
+			mouseLock = false;
+		}
+
+		if (mouseLock) {
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		}
+		else {
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		}
 
 		//Drawing Character
 		myShader.use();
@@ -375,7 +390,24 @@ int main() {
 		//glUniform1f(vertexColorLocation, blackValue);
 		
 
-		
+		ImGui_ImplGlfw_NewFrame();
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui::NewFrame();
+
+		ImGui::Begin("Settings");
+		{
+			ImGui::DragFloat3("Light Position", &lightPosition.x, 0.1f);
+			ImGui::ColorEdit3("Light Color", &lightColor.r);
+			ImGui::SliderFloat("Ambient K", &ambientK, 0.0f, 1.0f);
+			ImGui::SliderFloat("Diffuse K", &diffuseK, 0.0f, 1.0f);
+			ImGui::SliderFloat("Specular K", &specularK, 0.0f, 1.0f);
+			ImGui::SliderFloat("Shininess", &shininess, 2.0f, 1024.0f);
+		}
+		ImGui::End();
+
+
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 		glfwSwapBuffers(window);
 	}
@@ -386,6 +418,10 @@ int main() {
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
+	if (mouseLock == false)
+	{
+		return;
+	}
 	if (firstMouse)
 	{
 		lastX = xpos;
