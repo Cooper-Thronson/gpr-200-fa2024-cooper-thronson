@@ -36,6 +36,14 @@ float lastFrame = 0.0f;
 
 glm::mat4 model = glm::mat4(1.0f);
 
+glm::vec3 lightPosition;
+glm::vec3 lightColor;
+float ambientK;
+float diffuseK;
+float shininess;
+float specularK;
+
+
 
 glm::mat4 projection;
 //camera vecs
