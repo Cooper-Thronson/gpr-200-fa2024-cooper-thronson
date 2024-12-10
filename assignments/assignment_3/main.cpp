@@ -251,9 +251,7 @@ int main() {
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);;
 
 
-	//make the other 2 textures
-	//Texture2D bgTexture1("assets/Textures/CoolGuy.png", GL_NEAREST, GL_REPEAT, GL_RGBA);
-	//Texture2D bgTexture2("assets/Textures/wall.jpg", GL_NEAREST, GL_REPEAT, GL_RGB);
+	
 
 	//glm translation stuff
 	
@@ -276,10 +274,10 @@ int main() {
 	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 	direction.y = sin(glm::radians(pitch));
 
-	
+	//skysphere radius.
 	float radius = 1000.0f;
 
-	//nested for loop for the vertices
+	//nested for loop for the vertices. both of these use the row, heightstep, and anglestep variables to rotate around the circle at each distance, creating rings of indices and vertices.
 	for (int row = 0; row <= subdivs; row++)
 	{
 		float ph = heightStep * row;
@@ -294,7 +292,7 @@ int main() {
 			sphereVertices.push_back(v);
 		}
 	}
-
+	//indices loop. this checks which indices need to connect to which points, keeping relativity to the quad that is bein made. points are pushed back twice as they overlap as indices.
 	for (int row = 0; row < subdivs; row++)
 	{
 		for (int col = 0; col < subdivs; col++)
@@ -317,28 +315,7 @@ int main() {
 		}
 	}
 	
-	/*
-	for (; phi < glm::half_pi<float>() + heightStep; phi += heightStep, row++) {
-		y = glm::sin(phi);
-		radius = glm::cos(phi);
-		int cell = 0;
-		int noVertices = 0;
-		for (float th = 0; th < glm::two_pi<float>(); th += angleStep, cell++)
-		{
-			glm::vec3(radius* glm::cos(th), y, radius* glm::sin(th));
-			if (row)
-			{
-				int nextCell = (cell + 1) % subdivs;
-				sphereIndices.push_back(noVertices - subdivs);
-				sphereIndices.push_back((row - 1)* subdivs + nextCell);
-				sphereIndices.push_back(row* subdivs + nextCell);
-
-				sphereIndices.push_back(noVertices - subdivs);
-				sphereIndices.push_back(noVertices);
-				sphereIndices.push_back(row* subdivs + nextCell);
-			}
-		}
-	}*/
+	
 	//SPHERES
 	//vertex array object
 	unsigned int sphereVAO;
@@ -362,12 +339,6 @@ int main() {
 	// position attribute
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)0);
 	glEnableVertexAttribArray(0);
-	// color attribute
-	//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-	//glEnableVertexAttribArray(1);
-	// texture coord attribute
-	//glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-	//glEnableVertexAttribArray(1);
 
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);

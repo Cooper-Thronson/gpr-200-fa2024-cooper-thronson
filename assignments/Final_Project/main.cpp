@@ -18,17 +18,20 @@
 
 #include <ew/mesh.h>
 #include <ew/procGen.h>
-
+//The baseline code for this was all Cooper's. additions include skydome and water mesh, skydome parts done by cooper, water parts done by isa.
 
 const int SCREEN_WIDTH = 1080;
 const int SCREEN_HEIGHT = 720;
 
+//all of these shaders done by cooper, water shaders done by isa.
 const char* FRAG_SHADER_PATH = "assets/Shaders/fragmentShader.frag";
 const char* VERT_SHADER_PATH = "assets/Shaders/vertexShader.vert";
 const char* BG_VERT_SHADER_PATH = "assets/Shaders/bgVertexShader.vert";
 const char* BG_FRAG_SHADER_PATH = "assets/Shaders/bgFragShader.frag";
 const char* LB_FRAG_SHADER_PATH = "assets/Shaders/lightbulbShader.frag";
 const char* LB_VERT_SHADER_PATH = "assets/Shaders/lightbulbShader.vert";
+const char* SUN_VERT_SHADER_PATH = "assets/Shaders/sunVertexShader.vert";
+const char* SUN_FRAG_SHADER_PATH = "assets/Shaders/sunFragShader.frag";
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
@@ -155,8 +158,24 @@ glm::vec3 cubePositions[] = {
 	glm::vec3(5.3f,  -4.0f, -2.5f)
 };
 
+//setting up sphere vertexes for generation
+struct vertex {
+	glm::vec3 pos;
+	//glm::vec3 normal;
+	//glm::vec2 UV
+};
 
+//making the two vectors of vertices and indices, and then setting up variables in relation to pi for the pitch and yaw of all of the points.
+std::vector<vertex> sphereVertices;
+std::vector<unsigned int> sphereIndices;
+unsigned int subdivs = 64;
+float angleStep = glm::two_pi<float>() / (float)subdivs;
+float heightStep = glm::pi<float>() / (float)subdivs;
+float phi = -glm::half_pi<float>();
+float y = glm::sin(phi);
+int row = 0;
 
+//camera movement code
 void processInput(GLFWwindow* window)
 {
 	const float cameraSpeed = 2.5f * deltaTime;
@@ -207,13 +226,6 @@ int main() {
 
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-	/*unsigned int EBO;
-	glGenBuffers(1, &EBO);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-	*/
-
 	// position attribute
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
@@ -230,13 +242,15 @@ int main() {
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	Shader myShader { VERT_SHADER_PATH, FRAG_SHADER_PATH };
+	Shader myShader { VERT_SHADER_PATH, FRAG_SHADER_PATH }; // cooper
 
-	Shader bulbShader{ LB_VERT_SHADER_PATH, LB_FRAG_SHADER_PATH };
+	Shader bulbShader{ LB_VERT_SHADER_PATH, LB_FRAG_SHADER_PATH }; // cooper
 
 	Shader waterShader("assets/Shaders/waterVertexShader.vert", "assets/Shaders/waterFragmentShader.frag"); //water shader (isa)
 
-	//Shader bgShader { BG_VERT_SHADER_PATH, BG_FRAG_SHADER_PATH };
+	Shader sunShader{ SUN_VERT_SHADER_PATH, SUN_FRAG_SHADER_PATH }; // cooper
+
+	Shader bgShader { BG_VERT_SHADER_PATH, BG_FRAG_SHADER_PATH }; // cooper
 	
 
 	stbi_set_flip_vertically_on_load(true);
@@ -251,17 +265,12 @@ int main() {
 	ew::createPlaneXY(10.0f, 10.0f, 11, &waterMeshData);
 	ew::Mesh waterMesh = ew::Mesh(waterMeshData);
 
-
-	//make the other 2 textures
-	//Texture2D bgTexture1("assets/Textures/CoolGuy.png", GL_NEAREST, GL_REPEAT, GL_RGBA);
-	//Texture2D bgTexture2("assets/Textures/wall.jpg", GL_NEAREST, GL_REPEAT, GL_RGB);
-
-	//glm translation stuff
+	//glm view.
 	
 	glm::mat4 view = glm::mat4(1.0f);
 	
 
-	//glm location things
+	//glm view model and projection, from previous assignment.
 	
 	int modelLoc = glGetUniformLocation(myShader.ID, "model");
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
@@ -277,6 +286,75 @@ int main() {
 	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 	direction.y = sin(glm::radians(pitch));
 
+	//skysphere radius.
+	float radius = 1000.0f;
+
+	//nested for loop for the vertices. both of these use the row, heightstep, and anglestep variables to rotate around the circle at each distance, creating rings of indices and vertices.
+	for (int row = 0; row <= subdivs; row++)
+	{
+		float ph = heightStep * row;
+		for (int col = 0; col <= subdivs; col++)
+		{
+			float theta = angleStep * col;
+			vertex v;
+			v.pos.y = cos(ph);
+			v.pos.x = cos(theta) * sin(ph);
+			v.pos.z = sin(theta) * sin(ph);
+			v.pos *= radius;
+			sphereVertices.push_back(v);
+		}
+	}
+	//indices loop. this checks which indices need to connect to which points, keeping relativity to the quad that is bein made. points are pushed back twice as they overlap as indices.
+	for (int row = 0; row < subdivs; row++)
+	{
+		for (int col = 0; col < subdivs; col++)
+		{
+			int tl = row * (subdivs + 1) + col;
+			int tr = tl + 1;
+			int bl = tl + subdivs + 1;
+			int br = bl + 1;
+
+			sphereIndices.push_back(bl);
+			sphereIndices.push_back(br);
+			sphereIndices.push_back(tr);
+
+
+			sphereIndices.push_back(tr);
+			sphereIndices.push_back(tl);
+			sphereIndices.push_back(bl);
+
+
+		}
+	}
+
+
+	//SPHERES
+	//vertex array object
+	unsigned int sphereVAO;
+	glGenVertexArrays(1, &sphereVAO);
+	glBindVertexArray(sphereVAO);
+
+	//vertex buffer object
+	unsigned int sphereVBO;
+	glGenBuffers(1, &sphereVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, sphereVBO);
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex) * sphereVertices.size(), sphereVertices.data(), GL_STATIC_DRAW);
+
+	unsigned int sphereEBO;
+	glGenBuffers(1, &sphereEBO);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sphereEBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * sphereIndices.size(), sphereIndices.data(), GL_STATIC_DRAW);
+
+
+	// position attribute
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)0);
+	glEnableVertexAttribArray(0);
+
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
 
 	
 
@@ -288,24 +366,20 @@ int main() {
 		glClearColor(0.3f, 0.4f, 0.9f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		//time variable for waves
 		float time = (float)glfwGetTime();
 
 		float currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 
+		projection = glm::perspective(glm::radians(fov), 800.0f / 600.0f, 0.1f, 10000.0f);
+
+		view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+		myShader.setMat4("projection", projection);
+		myShader.setMat4("view", view);
+
 		ew::DrawMode drawMode = pointRender ? ew::DrawMode::POINTS : ew::DrawMode::TRIANGLES; //set draw mode for water draw call (isa)
-		/*
-		//Drawing BG
-		bgShader.use();
-		//i think this code should work after i make the textures?
-		
-		bgShader.setInt("texture1", 0);
-		bgShader.setInt("texture2", 1);
-		bgShader.setFloat("scale", 50);
-		bgTexture1.Bind(GL_TEXTURE0);
-		bgTexture2.Bind(GL_TEXTURE1);
-		*/
 
 		//water shenanigans (courtesy of Isa)
 		waterShader.use();
@@ -331,6 +405,28 @@ int main() {
 		waterMesh.draw(drawMode);
 		//end water shenanigans
 
+		//draw sphere
+		bgShader.use();
+		bgShader.setMat4("projection", projection);
+		bgShader.setMat4("view", view);
+		bgShader.setFloat("maxYPos", radius);
+		glm::mat4 model = glm::mat4(1.0f);
+		glPointSize(4.0);
+		glEnable(GL_CULL_FACE);
+		glPolygonMode(GL_CULL_FACE, GL_FILL);
+		glBindVertexArray(sphereVAO);
+		bgShader.setMat4("model", model);
+		glDrawElements(GL_TRIANGLES, sphereIndices.size(), GL_UNSIGNED_INT, 0);
+		//create sun
+		sunShader.use();
+		sunShader.setMat4("projection", projection);
+		sunShader.setMat4("view", view);
+		glDisable(GL_CULL_FACE);
+		model = glm::translate(model, glm::vec3(0.0f, 2.0f, -150.0f));
+		model = glm::scale(model, glm::vec3(0.0015f, 0.0015f, 0.0015f));
+		sunShader.setMat4("model", model);
+		glDrawElements(GL_TRIANGLES, sphereIndices.size(), GL_UNSIGNED_INT, 0);
+
 		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS)
 		{
 			mouseLock = true;
@@ -346,37 +442,6 @@ int main() {
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		}
 
-		//Drawing Character
-		myShader.use();
-
-		
-
-		projection = glm::perspective(glm::radians(fov), 800.0f / 600.0f, 0.1f, 100.0f);
-		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-	
-		view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-		myShader.setMat4("projection", projection);
-		myShader.setMat4("view", view);
-
-
-		glBindVertexArray(VAO);
-
-		texture.Bind(GL_TEXTURE2);
-		myShader.setInt("ourTexture", 2);
-		
-		for (unsigned int i = 0; i < 20; i++)
-		{
-			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, cubePositions[i]);
-			float angle = 20.0f * i;
-			model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-			model = glm::scale(model, glm::vec3(i/5, i/5, i/5));
-			myShader.setMat4("model", model);
-
-			//draw arrays?
-			glDrawArrays(GL_TRIANGLES, 0, 36);
-		}
-
 		bulbShader.use();
 
 		bulbShader.setMat4("projection", projection);
@@ -385,7 +450,6 @@ int main() {
 
 		bulbShader.setVec3("aColor", lightColor);
 
-		glm::mat4 model = glm::mat4(1.0f);
 		//POS FROM IMGUI
 		model = glm::translate(model, lightPosition);
 
@@ -395,18 +459,9 @@ int main() {
 		
 
 		
-		//texture.Bind();
 		
 		
-
-		//float timeValue = glfwGetTime();
-		//float blackValue = sin(timeValue) / 2.0f + 0.5f;
-
-		//shader.cpp setfloat
-		//int vertexColorLocation = glGetUniformLocation(myShader.ID, "colorScale");
-		//glUniform1f(vertexColorLocation, blackValue);
-		
-
+		//imGUI settings
 		ImGui_ImplGlfw_NewFrame();
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui::NewFrame();
@@ -436,6 +491,7 @@ int main() {
 
 }
 
+//handles mouse postions and movement
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
 	if (mouseLock == false)
@@ -472,7 +528,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 	cameraFront = glm::normalize(direction);
 }
-
+//handles zoom.
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
 	fov -= (float)yoffset;
