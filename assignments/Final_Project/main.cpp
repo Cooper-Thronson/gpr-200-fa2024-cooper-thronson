@@ -27,6 +27,8 @@ const char* FRAG_SHADER_PATH = "assets/Shaders/fragmentShader.frag";
 const char* VERT_SHADER_PATH = "assets/Shaders/vertexShader.vert";
 const char* BG_VERT_SHADER_PATH = "assets/Shaders/bgVertexShader.vert";
 const char* BG_FRAG_SHADER_PATH = "assets/Shaders/bgFragShader.frag";
+const char* LB_FRAG_SHADER_PATH = "assets/Shaders/lightbulbShader.frag";
+const char* LB_VERT_SHADER_PATH = "assets/Shaders/lightbulbShader.vert";
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
@@ -230,6 +232,8 @@ int main() {
 
 	Shader myShader { VERT_SHADER_PATH, FRAG_SHADER_PATH };
 
+	Shader bulbShader{ LB_VERT_SHADER_PATH, LB_FRAG_SHADER_PATH };
+
 	Shader waterShader("assets/Shaders/waterVertexShader.vert", "assets/Shaders/waterFragmentShader.frag"); //water shader (isa)
 
 	//Shader bgShader { BG_VERT_SHADER_PATH, BG_FRAG_SHADER_PATH };
@@ -373,7 +377,20 @@ int main() {
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 
+		bulbShader.use();
 
+		bulbShader.setMat4("projection", projection);
+		bulbShader.setMat4("view", view);
+		//IMGUI
+
+		bulbShader.setVec3("aColor", lightColor);
+
+		glm::mat4 model = glm::mat4(1.0f);
+		//POS FROM IMGUI
+		model = glm::translate(model, lightPosition);
+
+		bulbShader.setMat4("model", model);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		
 
