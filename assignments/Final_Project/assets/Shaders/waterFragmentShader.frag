@@ -11,6 +11,7 @@ in mat4 InvView;
 uniform vec3 lightPos;
 uniform vec3 lightColor;
 uniform vec3 viewPos;
+uniform float shiny;
 
 void main()
 {
@@ -22,7 +23,7 @@ void main()
 
     vec3 ambient = ambientStrength * lightColor;
     
-    vec3 objectColor = vec3(0.51, 0.75, 0.85);
+    vec3 objectColor = vec3(0.2, 0.5, 0.65);
 
     //recalculate normals for lighting in view space
     vec3 xTangent = dFdx(ViewSpacePos);
@@ -39,13 +40,13 @@ void main()
     vec3 reflectDir = reflect(-lightDir, norm); 
 
     //specular lighting
-    float spec = pow(max(dot(norm, halfwayDir), 0.0), 32);
+    float spec = pow(max(dot(norm, halfwayDir), 0.0), shiny);
     vec3 specular = lightColor * spec; 
 
     //diffuse lighting
     float diff = max(dot(norm, lightDir), 0.0);
     vec3 diffuse = diff * lightColor;
 
-    vec3 result = mix((ambient + diffuse + specular), objectColor, 0.7);
+    vec3 result = mix((ambient + diffuse + specular), objectColor, 0.6);
     FragColor = vec4(result, 1.0);
 }

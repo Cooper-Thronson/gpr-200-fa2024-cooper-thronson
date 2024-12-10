@@ -41,18 +41,18 @@ float lastFrame = 0.0f;
 
 glm::mat4 model = glm::mat4(1.0f);
 
-glm::vec3 lightPosition;
-glm::vec3 lightColor;
+glm::vec3 lightPosition = glm::vec3(20.7f, 0.0f, 0.0f);
+glm::vec3 lightColor = glm::vec3(1.0f, 0.45f, 0.0f);
 float ambientK;
 float diffuseK;
-float shininess;
+float shininess = 64.0f;
 float specularK;
 
 
 
 glm::mat4 projection;
 //camera vecs
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 cameraPos = glm::vec3(20.0f, 3.0f, 3.0f);
 glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
 glm::vec3 cameraDirecton = glm::normalize(cameraPos - cameraTarget);
 glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -262,7 +262,7 @@ int main() {
 
 	// water plane initialization (isa)
 	ew::MeshData waterMeshData;
-	ew::createPlaneXY(10.0f, 10.0f, 11, &waterMeshData);
+	ew::createPlaneXY(50.0f, 50.0f, 55, &waterMeshData);
 	ew::Mesh waterMesh = ew::Mesh(waterMeshData);
 
 	//glm view.
@@ -395,6 +395,7 @@ int main() {
 		waterShader.setVec3("lightColor", lightColor);
 		waterShader.setVec3("viewPos", cameraPos);
 		waterShader.setFloat("time", time);
+		waterShader.setFloat("shiny", shininess);
 
 		//more plane tomfoolery
 		glm::mat4 planeTransform = glm::mat4(1);
@@ -475,7 +476,7 @@ int main() {
 		ImGui::SliderFloat("Specular K", &specularK, 0.0f, 1.0f);
 		ImGui::SliderFloat("Shininess", &shininess, 2.0f, 1024.0f);
 		
-		if (ImGui::Checkbox("Water Mesh Wireframe", &waterWireFrame)) {
+		if (ImGui::Checkbox("Wireframe", &waterWireFrame)) {
 			glPolygonMode(GL_FRONT_AND_BACK, waterWireFrame ? GL_LINE : GL_FILL);
 		}
 		ImGui::End();
