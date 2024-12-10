@@ -412,14 +412,14 @@ int main() {
 		ImGui::NewFrame();
 
 		ImGui::Begin("Settings");
-		{
-			ImGui::DragFloat3("Light Position", &lightPosition.x, 0.1f);
-			ImGui::ColorEdit3("Light Color", &lightColor.r);
-			ImGui::SliderFloat("Ambient K", &ambientK, 0.0f, 1.0f);
-			ImGui::SliderFloat("Diffuse K", &diffuseK, 0.0f, 1.0f);
-			ImGui::SliderFloat("Specular K", &specularK, 0.0f, 1.0f);
-			ImGui::SliderFloat("Shininess", &shininess, 2.0f, 1024.0f);
-		}
+		
+		ImGui::DragFloat3("Light Position", &lightPosition.x, 0.1f);
+		ImGui::ColorEdit3("Light Color", &lightColor.r);
+		ImGui::SliderFloat("Ambient K", &ambientK, 0.0f, 1.0f);
+		ImGui::SliderFloat("Diffuse K", &diffuseK, 0.0f, 1.0f);
+		ImGui::SliderFloat("Specular K", &specularK, 0.0f, 1.0f);
+		ImGui::SliderFloat("Shininess", &shininess, 2.0f, 1024.0f);
+		
 		if (ImGui::Checkbox("Water Mesh Wireframe", &waterWireFrame)) {
 			glPolygonMode(GL_FRONT_AND_BACK, waterWireFrame ? GL_LINE : GL_FILL);
 		}
